@@ -34,7 +34,12 @@ module Rails
       pages = ApiPagination.pages_from(collection)
 
       pages.each do |k, v|
-        new_params = request.query_parameters.merge(:page => v)
+        if defined?(ActiveModel::Serializer) && (ActiveModel::Serializer.config.adapter == :json_api)
+          new_params = request.query_parameters.merge(:page => {:number => v})
+        else
+          new_params = request.query_parameters.merge(:page => v)
+        end
+        
         links << %(<#{url}?#{new_params.to_param}>; rel="#{k}")
       end
 
